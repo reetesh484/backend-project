@@ -64,7 +64,6 @@ userSchema.methods = {
         this.forgotPasswordExpiry = Date.now() + 20*60*1000
         return forgotToken
     }
-
 }
 
 export default mongoose.model("User", userSchema)
