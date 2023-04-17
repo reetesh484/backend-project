@@ -1,6 +1,8 @@
 import express from "express";
 import cors from 'cors';
 import cookieParser from "cookie-parser";
+import routes from "./routes/index.js"
+
 
 const app = express()
 
@@ -12,4 +14,18 @@ app.use(cors())
 
 app.use(cookieParser())
 
+app.use("/api/v1/",routes);
+
+app.get("/",(_req,res) => {
+    res.send("<h1>Welcome to Ecommerce API</h1>")
+})
+
+app.all("*",(_req,res) => {
+    return res.status(404).json({
+        success:false,
+        message:"Route not found"
+    })
+})
+
 export default app;
+
