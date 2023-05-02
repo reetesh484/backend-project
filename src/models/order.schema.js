@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import OrderStatus from "../utils/orderStatus";
 
 const orderSchema = mongoose.Schema({
-    product:{
+    products:{
         type:[
             {
                 productId:{

@@ -103,23 +103,23 @@ export const getProductByCollectionId = asyncHandler(async (req, res) => {
 
     const products = await Product.find({ collectionId })
 
-    if(!products){
-        throw new CustomError("No products found",404);
+    if (!products) {
+        throw new CustomError("No products found", 404);
     }
 
     res.status(200).json({
-        success:true,
+        success: true,
         products
     })
 })
 
 
-export const deleteProduct = asyncHandler(async(req,res) => {
-    const {id:productId} = req.params
+export const deleteProduct = asyncHandler(async (req, res) => {
+    const { id: productId } = req.params
 
     const product = await Product.findById(productId)
-    if(!product){
-        throw new CustomError("Product doesn't exist",404);
+    if (!product) {
+        throw new CustomError("Product doesn't exist", 404);
     }
 
     //just removing the product will not remove the photos so we need to remove the photos first
@@ -129,10 +129,10 @@ export const deleteProduct = asyncHandler(async(req,res) => {
     //key : product._id
 
     const deletePhotos = Promise.all(
-        product.photos.map(async(element,index) => {
+        product.photos.map(async (element, index) => {
             await s3deleteFile({
-                bucketName:config.S3_BUCKET_NAME,
-                key:`products/${productId.toString()}/photo_${index+1}.png`
+                bucketName: config.S3_BUCKET_NAME,
+                key: `products/${productId.toString()}/photo_${index + 1}.png`
             })
         })
     )
@@ -141,21 +141,35 @@ export const deleteProduct = asyncHandler(async(req,res) => {
 
     await product.remove()
     res.status(200).json({
-        success:true,
-        message:"Product has been deleted successfully"
+        success: true,
+        message: "Product has been deleted successfully"
     })
 })
 
-export const updateProduct = asyncHandler(async(req,res) => {
-    const {id:productId} = req.params
+export const updateProduct = asyncHandler(async (req, res) => {
+    const { id: productId } = req.params
+    const { name, price, description, photos, stock } = req.body
 
-    //TODO:handle update product
-
-    const product = Product.findById(productId)
-
-    if(!product){
-        throw new CustomError("Product doesn't exists",404);
+    if (!name || !price || !description || !photos || !stock) {
+        throw new CustomError("Please enter all the details", 400)
     }
 
+    const product = await Product.findByIdAndUpdate(
+        productId,
+        { name, price, description, photos, stock },
+        {
+            new: true,
+            runValidators: true
+        })
+
+    if (!product) {
+        throw new CustomError("Product doesn't exists", 404);
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "Product updated successfully",
+        product
+    })
 
 })
